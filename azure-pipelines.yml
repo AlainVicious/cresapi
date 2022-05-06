@@ -1,0 +1,33 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool: kreswin
+
+steps:
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.Repository.LocalPath)'
+    Contents: '**/*!(.git|Lib)'
+    TargetFolder: '$(Build.StagingDirectory)'
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.StagingDirectory)'
+    Contents: '**'
+    TargetFolder: '$(TestLocation)'
+    OverWrite: true
+- task: CmdLine@2
+  inputs:
+    script: |
+      echo Reiniciando apache server
+      
+      httpd -k restart
